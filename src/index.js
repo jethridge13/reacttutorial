@@ -5,9 +5,19 @@ import './index.css';
 function Square(props) {
 	return (
 		<button className="square" onClick={props.onClick}>
-		{props.value}
+			{props.value}
 		</button>
 	);
+}
+
+function MoveHistory(props) {
+	if (props.move > 0) {
+		return (
+			<div>{`${props.player}: (${props.coordX},${props.coordY})`}</div>
+		);
+	} else {
+		return null;
+	}
 }
 
 class Board extends React.Component {
@@ -49,6 +59,9 @@ class Game extends React.Component {
 		this.state = {
 			history: [{
 				squares: Array(9).fill(null),
+				turn: Array(9).fill(null),
+				x: Array(9).fill(null),
+				y: Array(9).fill(null),
 			}],
 			stepNumber: 0,
 			xIsNext: true,
@@ -59,13 +72,22 @@ class Game extends React.Component {
 		const history = this.state.history.slice(0, this.state.stepNumber + 1);
 		const current = history[history.length - 1];
 		const squares = current.squares.slice();
+		const x = history[this.state.stepNumber].x.slice();
+		const y = history[this.state.stepNumber].y.slice();
+		const turn = history[this.state.stepNumber].turn.slice();
 		if (calculateWinner(squares) || squares[i]) {
 			return;
 		}
 		squares[i] = this.state.xIsNext ? 'X' : 'O';
+		x[this.state.stepNumber] = i % 3;
+		y[this.state.stepNumber] = Math.floor(i / 3);
+		turn[this.state.stepNumber] = this.state.xIsNext ? 'X' : 'O';
 		this.setState({
 				history: history.concat([{
 					squares: squares,
+					turn: turn,
+					x: x,
+					y: y,
 				}]),
 				stepNumber: history.length,
 				xIsNext: !this.state.xIsNext,
@@ -85,12 +107,17 @@ class Game extends React.Component {
 		const winner = calculateWinner(current.squares);
 
 		const moves = history.map((step, move) => {
+			const player = step.turn[move-1]
+			const coordX = step.x[move-1]
+			const coordY = step.y[move-1]
 			const desc = move ?
 				`Go to move #${move}` :
 				'Go to game start';
 			return (
 				<li key={move}>
 					<button onClick={() => this.jumpTo(move)}>{desc}</button>
+					<MoveHistory player={player}
+					coordX={coordX} coordY={coordY} move={move}/>
 				</li>
 			);
 		});
