@@ -10,13 +10,24 @@ function Square(props) {
 	);
 }
 
-function MoveHistory(props) {
-	if (props.move > 0) {
-		return (
-			<div>{`${props.player}: (${props.coordX},${props.coordY})`}</div>
-		);
-	} else {
-		return null;
+class MoveHistory extends React.Component {
+
+	renderText() {
+		if (this.props.move === this.props.stepNumber) {
+			return <b>{this.props.player}: ({this.props.coordX},{this.props.coordY})</b>;
+		} else {
+			return `${this.props.player}: (${this.props.coordX},${this.props.coordY})`;
+		}
+	}
+
+	render() {
+		if (this.props.move > 0) {
+			return (
+				<div>{this.renderText()}</div>
+			);
+		} else {
+			return null;
+		}
 	}
 }
 
@@ -110,14 +121,16 @@ class Game extends React.Component {
 			const player = step.turn[move-1]
 			const coordX = step.x[move-1]
 			const coordY = step.y[move-1]
+
 			const desc = move ?
 				`Go to move #${move}` :
 				'Go to game start';
+
 			return (
 				<li key={move}>
 					<button onClick={() => this.jumpTo(move)}>{desc}</button>
-					<MoveHistory player={player}
-					coordX={coordX} coordY={coordY} move={move}/>
+					<MoveHistory stepNumber={this.state.stepNumber}
+					player={player} coordX={coordX} coordY={coordY} move={move}/>
 				</li>
 			);
 		});
